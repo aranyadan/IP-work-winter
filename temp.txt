@@ -1,0 +1,168 @@
+
+#include "stdafx.h"
+#include <iostream>
+#include <opencv2\core\core.hpp>
+#include <opencv2\highgui\highgui.hpp>
+#include <queue>
+#include  <opencv2\imgproc\imgproc.hpp>
+using namespace std;
+using namespace cv;
+
+int*** blobit(Mat img, int *count)				//returns a 3d array with a[r][c][0] containing blob id 
+{												//and a[r][c][1] containing hue value and also counts no of blobs
+	int ***a = (int ***)malloc(img.rows*sizeof(int**));
+	for (int m = 0; m < img.rows; m++)
+	{
+		a[m] = (int **)malloc(img.cols*sizeof(int*));
+		for (int n = 0; n < img.cols; n++)
+			a[m][n] = (int *)malloc(2 * sizeof(int));
+	}
+	for (int k = 0; k < img.rows; k++)
+	{
+		for (int l = 0; l < img.cols; l++)
+		{
+			a[k][l][0] = -1;
+		}
+	}
+
+	int num = 1, m, n;
+	queue<Point> q;
+	for (int r = 0; r < img.rows; r++)
+	{
+		for (int c = 0; c < img.cols; c++)
+		{
+			if (img.at<Vec3b>(r, c)[1] != 0 && a[r][c][0] == -1)
+			{
+				Point p;
+				p.x = r;
+				p.y = c;
+				q.push(p);
+				a[r][c][0] = 0;
+				m = r; n = c;
+				while (1)
+				{
+					for (int k = m - 1; k <= m + 1; k++)
+					{
+						for (int l = n - 1; l <= n + 1; l++)
+						{
+							if (k<0 || l<0 || k>img.rows || l>img.cols)
+								continue;
+							if (img.at<Vec3b>(k, l)[1] != 0 && a[k][l][0] == -1)
+							{
+								Point p;
+								p.x = k;
+								p.y = l;
+								q.push(p);
+								a[k][l][0] = 0;
+							}
+
+						}
+					}
+					a[m][n][0] = num;
+					q.pop();
+					if (q.empty() == true)
+						break;
+					Point z = q.front();
+					m = z.x;
+					n = z.y;
+				}
+				num++;
+			}
+
+		}
+	}
+	*count = num - 1;
+	for (int h = 0; h <= 360; h++)
+	{
+		for (int m = 0; m < img.rows; m++)
+		{
+			for (int n = 0; n < img.cols; n++)
+			{
+				if (a[m][n][0] != -1 && img.at<Vec3b>(m, n)[0] == h)
+					a[m][n][1] = h;
+			}
+		}
+	}
+
+
+	return a;
+}
+int **calcy(Mat img, int***blob, int count)		//calculates the highest y coord of a blob and stores and returns it in an array
+{												//y[i][0]-> blob id y[i][1]->row coord y[i][2]-> col coord
+	int **y = new int*[count];
+	for (int i = 0; i < count; i++)
+	{
+		y[i] = new int[4];
+	}
+	for (int i = 0; i < count; i++)
+	{
+		Point p;
+		p.x = -1;
+		p.y = -1;
+		for (int r = 0; r < img.rows; r++)
+		{
+			for (int c = 0; c < img.cols; c++)
+			{
+				if (blob[r][c][0] == i + 1)
+				{
+					if (r>p.y)
+					{
+						p.y = r;
+						p.x = c;
+					}
+				}
+
+			}
+
+		}
+		if (p.y == -1)
+			continue;
+		y[i][0] = i + 1;
+		y[i][1] = p.y;
+		y[i][2] = p.x;
+	}
+	return y;
+}
+Mat printpixel(Mat img, int **a, int count)					//prints the lowest pixel of each blob, returns the mat img
+{															//containing only those pixels
+	Mat img2(img.rows, img.cols, CV_8UC1, Scalar(0));
+	for (int k = 0; k < count; k++)
+	{
+		for (int i = 0; i < img.rows; i++)
+		{
+			for (int j = 0; j < img.cols; j++)
+			{
+				if (a[k][1] == i && a[k][2] == j)
+					img2.at<uchar>(i, j) = 255;
+			}
+		}
+	}
+	return img2;
+}
+int main()
+{
+	Mat img;
+	int m = 238;
+	img = imread("C:\\Users\\ARANYA\\Desktop\\stuff\\IP\\proj\\pics\\3.png", CV_LOAD_IMAGE_COLOR);
+	Mat img2;
+	cvtColor(img, img2, CV_BGR2HLS);
+	namedWindow("hsv", CV_WINDOW_AUTOSIZE);
+	cvCreateTrackbar("hue", "hsv", &m, 360);
+	int count = 0;
+	int*** blob = blobit(img, &count);
+	int **ycoord = calcy(img, blob, count);
+	for (int i = 0; i < count; i++)
+	{
+		for (int j = 0; j < 3; j++)
+		{
+			cout << ycoord[i][j] << " ";
+		}
+		cout << "\n";
+	}
+	img2 = printpixel(img, ycoord, count);
+	imshow("hsv", img2);
+	waitKey(0);
+	return 0;
+}
+
+

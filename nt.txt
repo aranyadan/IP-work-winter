@@ -1,0 +1,336 @@
+#DAY 1
+
+# include <iostream>
+using namespace std
+std:: cout<< "" <<a<<""
+cin>>a
+Mat class
+contains images
+Mat img;->img declaration
+data members-
+rows, col
+cout<<img.rows -> prints no of rows
+
+constructor for Mat-
+Mat img(r,c,CV_8UC1); CV_8UC-> depth(no of bits) & channels
+CV_8UC is a macro...
+CV_8UC3 means 8 depth 3 channels
+CV_8UC1 means 8 depth 1 channel
+default three channels- RGB
+
+
+constructors:
+stu(int x=5,char b='A')
+{rnum=x;grade=b;}
+stu s(10,'c'); -> rnum=10, grade =b
+stu s1; -> rnum=5, grade =A, same as  stu s();
+
+Mat img; -> default vals stored (most probably 0,0,0)
+Ma img2(100,200,CV_8UC1);-> declares specific image
+
+iostream -> library for I/O
+headers:
+# include <opencv2/core/core.hpp>
+#include "opencv2/highgui/highgui.hpp"
+using namespace std; -> I/O
+using namespace cv; -> Mat is declared in cv so we dont have to write cv::Mat
+
+FUNCTION:
+imread(path,mode of import)
+path-> c:\......whatever
+mode-> commonly done by macros-
+	CV_LOAD_IMAGE_COLOR -> actual value is 1
+	CV_LOAD_IMAGE_GREYSCALE -> actual value is 0
+if 2nd parameter is skipped, immg is loaded in colour...
+Mat img=imread("C:\\pics"); -> reads image (use double back-slashes for directories (\\))
+cout<<img.rows; ->prints no of rows of the imported image
+
+
+HISTOGRAMS
+threshhold is selected so tht half of the pixels are white and the other half black, roughly
+
+FUNCTION 2:
+namedWindow(name of window,size of window(generally macro)); -> just like creating a window where we will print
+name->"dfghj"
+size->WINDOW_AUTOSIZE ->window becomes size of the image
+	    _FULLSCREEN-> fullscreen
+	    _NORMAL-> U CAN RESIZE
+
+
+FUNCTION 3:
+imshow(name of window,name of Mat image); ->prints image in the window
+name of window-> declared with last fxn
+name of image-> img -> prints img
+
+FUNCTION 4:
+waitkey(0); -> waits in ms with the pic, 0 means infinity
+
+
+accessing pixels
+int a=img.at<uchar>(r,c);
+r,c- co-ord of the pt
+for 3 d array
+img.at<Vec3b>(r,c)[z]
+z=0,b z=1,g z=2,r
+
+vectors
+#include <vector>
+vector<datatype> v; -> datatype just like an array
+
+
+ASSIGNMENT- print red channel
+
+
+#DAY2
+
+cout<<namedWindow.... ->prints the image in the console
+Mat canbe declared with 4 params
+4th par-> scalar
+Mat(r,c,macro,Scalar())-> for one channel
+scalar is used to initialise.
+if we send Scalar(0), we get all pixel values as 0. for Scalar(128) will make all pixels 128.
+for 3 channels,
+Scalar( , , )
+Scalar(0,0,255) gives pure red
+
+TRACKBARS
+createTrackbar(name of trackbar,name of window,variable to change(&x), max val of param)->creates trackbar
+name-> appears on the bar
+window-> window on which it appears
+var->the variable which i want to change, written as &x
+max->max value it can have, min will aways be 0
+Mat bin=makebinary(image,x) inside an infinite loop
+
+int a=waitkey(5000);->returns -1 if nothing is pressed for 5 secs or the ascii value of the pressed key
+breaking out of trackbar loop:
+char a=waitkey(33)
+if a=27, break
+27 is the esc key
+
+Day 3
+edge detecion
+kernelwise iteration
+if max-min> threshhold, turn white in back background
+ find del x and del y
+del x-> diff between pixels on either side of theconcerned pixel horizontally and also the upperrow and lower one
+       take the sum of all three
+weightages-
+-1 | 0 | 1
+-----------
+-1 | 0 | 1
+----------
+-1 | 0 | 1
+
+
+ for del y,
+
+-1 | -1 | -1
+-----------
+0 | 0 | 0
+----------
+1 | 1 | 1
+
+
+get moduli of the vector formed by del y and del x and assign that value to the center pixel
+
+
+NOISE REDUCTION
+--reducing unwanted info
+1)dilation
+2)erosion
+
+dilation->
+	
+	count no of black and white in a kernel of a bin image (including the middle pixel) and assign
+	the larger frequency value to the middle pixel
+erosion->
+
+	do the same, but assign the lower frequency value to the pixel. ignore lower value if it is 0.
+
+first apply dilation to remove the noise and reducing the size of the pic.
+erosion the resizes the pic.
+
+FILTERS
+one method is blurring by taking average of each kernel.
+or we can find the diff between each pixel with the avg of the kernel and if it is too large, ignore.
+or take the median of the 9 pixels. (good)
+or use gaussian distribution and find weighted avg.
+for easy gaussian, use template
+___________________
+|.06  | .098 | .06|
+-------------------
+|.098 |.162  |.098|
+-------------------
+|.06  |.098  |.06 |
+-------------------
+
+
+
+
+CANNY   another edge detector
+-gaussian filtering
+-detetcting edges using sobel
+SOBEL
+
+-1 | 0 | 1
+-----------
+-2 | 0 | 2           (for x)
+----------
+-1 | 0 | 1
+
+
+-non maximum expression/edge thinning
+-hysteris threshholding
+
+
+
+so we can find theta and magnitude using sobel for each pixel, essentially a vector
+the direction  of the vector denotes the normal to th edge
+if theta is between 0 and 22.5, we take theta =0.
+if it is between 22.5 and 67.5, theta=45
+if between 67.5 and 112.5, theta =90
+if between 112.5 and 152.5, theta =135
+if between 152.5 and 180, theta =180
+
+then find the modified theta
+for the vector in the middle pixel, get the 2 other pixels which are collinear with that 
+then check the magnitudes of the three vectors
+if the mid pixel's magnitude is more than the other 2, keep it. else turn it black.
+then we convert to binary
+get 2 input threshholds
+if the pixel is below lower, pixel=0
+if above higher, pixel=255
+if midway, check surrounding pixels. if white found, put white else black.
+
+
+USAGE
+void Canny(input,out,lower,upper,kernel size)
+default kernel size=3
+out will store the finished image
+
+
+DAY 4
+
+VIDEOS
+VideoCapture -> class for video
+VideoCapture v("path of video");
+if we use v(0), the webcam in the laptop is used
+if we use v(1), the secondary cam is used (externally attached)
+
+showing a video-
+while(1)
+{
+	Mat frame;
+	V>>frame; -> initialises frame with a simple frame of the video...automatically updates
+		     so in the next iteration, it uses the next frame
+	imshow(...);
+	wait....;
+	
+}
+
+DIFF COLOR SCHEMES
+
+
+HSV or HSL
+hue saturation value/light
+saturation-> the more i add a complimentary colour to a pure colour, the sat value changes
+
+considering the hsv model as a cylinder, hue  changes with theta, saturation changes with dist frm centre,
+and luminousity changes with brightness of the colour
+
+colour detetction in rgb model
+if(int of blue> thresh1 && int of green and red<thresh2)
+
+also if shadows fall on the object, rgb values will change
+
+in hsv model, hue cannot change
+set a tolerance for hue  val, say tolH to  original hue, H0.
+
+if (hue <H0 + tolH && hue> H0-tolH)
+set as  white
+so we get a binary image with only a single colour colouured white
+
+
+FUNCTION for conversion of BGR to HSV
+
+ cvtColor(input,output,CV_BGR2HLS);
+H->0, S->1, V->2
+
+
+BLOB DETETCTION
+using stack-> depth first search (dfs)
+using queues-> breadth first search (bfs)
+
+
+GRAPHS
+
+G=(V,E)
+V-> no of vertices/ nodes
+E-> edges, connecting nodes
+
+nodes are like the pixels
+graphs are basically a network of nodes
+
+we basically assign a different id to a different blob so that we can call tht blob when needed
+so create another 2 d array with cells=0 for bckgrnd
+for each blob, give all the pixels an id, say 1
+for the other blob, give 2
+so we can print individual blobs
+
+BREADTH FIRST SEARCH
+
+Point(x,y)->a datastructure provided by open cv storing x and y, the cooords
+we use queues t store the pixels
+
+steps-
+create a 2 d array with initial val=-1
+iterate in the image until  u get the first white pixel
+add the adjacent white pixels to the queue and keep dequeueing them int the int array
+next, add the pixel to the queue only if the value in the array is -1
+the moment you pick up a pixel, assign it the value 0 in the int array
+when all the neighours are added, dequeue the array and assign 1 to tht pixel
+when the queue is empty, blob is finished
+for next blob, store 2 insted of 1
+
+
+
+DEPTH FIRST SEARCH
+keep storing in the stack. when done, start popping
+c++ stl
+#include <queue>
+queue<Point> list ->creates a queue of points called list
+inside the loop, create Point p, put p.x and p.y, then push with p
+list.push(Point) ->enqueue
+list.top() -> returns dequeuing value
+list.pop() ->returns and dequeues
+
+DAY 5
+
+LINE EXTRACTION
+only straight lines are detected
+
+edge detection method
+using sobel, find vectors of each pixel
+then use blob detection and isolate the blobs from the canny image
+then if consecutive pixels have the same angle value for the vector,it is part of a straigh line
+put a threshhold, so that lines only above some no of pixels will be shown, else bunk it
+
+slope method
+HOUGH graph
+
+DAY 6
+shape detection-
+
+void findContours(input,vector<vector<Point>> c,CV_RETR_CCOMP,CV_CHAIN_APPROX_SIMPLE)
+
+input-> binary, with black background
+vector<vector<Point>> c -> 2 d array of vectors storing the contours
+c.size()-> gives size of the vector (rows) c[0].size() gives col no.
+
+approxPolyDP(c[i],app,double epsion,true)
+
+c[i]-> the vector of pnts
+app->stores the coords of the corners
+size of app gives the no of corners
+double epsilon-> some parameter for error....send arclength(c[i],true)*0.02
+true-> whether the figure is closed or open (false for open fig)
