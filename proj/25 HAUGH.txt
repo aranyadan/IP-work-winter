@@ -1,0 +1,76 @@
+// ComputerVision.cpp : Defines the entry point for the console application.
+//
+#include "stdafx.h"
+#include <iostream>
+#include <opencv2\core\core.hpp>
+#include <opencv2\highgui\highgui.hpp>
+#include <math.h>
+
+using namespace std;
+using namespace cv;
+void update(Mat img, int r, int c, int **a,int size)
+{
+	for (int j = 0; j < 181; j++)
+	{
+		int l = (int)(r*sin(j*3.14 / 180) + c*cos(j*3.14 / 180)) + 1;
+		if (l < 0)
+			l *= -1;
+		a[l][j] ++;
+	}
+
+}
+void hough(Mat img)
+{
+	
+	int count = (int)sqrt(img.rows*img.rows + img.cols*img.cols)+1;
+	
+	int **a = (int **)malloc(count*sizeof(int*));
+	for (int m = 0; m < count; m++)
+	{
+		a[m] = (int *)malloc(200*sizeof(int));
+	}
+	for (int k = 0; k < count; k++)
+	{
+		for (int l = 0; l < 181; l++)
+		{
+			a[k][l] = 0;
+		}
+	}
+	for (int m = 0; m < img.rows; m++)
+	{
+		for (int n = 0; n<img.cols; n++)
+		{
+			if (img.at<uchar>(m, n) == 255)
+			{
+				update(img, m, n, a,count);
+			}
+		}
+	}
+	
+	Mat img3(count,181,CV_8UC1,Scalar(0));
+	for (int i = 0; i < img3.rows; i++)
+	{
+		for (int j = 0; j < img3.cols; j++)
+		{
+			if (a[i][j]>255)
+				img3.at<uchar>(i, j) = 0;
+			else
+				img3.at<uchar>(i, j) = 255-a[i][j];
+		} 
+	} 
+
+	namedWindow("my window", CV_WINDOW_NORMAL);
+	imshow("my window", img3);
+	waitKey(0);
+
+}
+int main()
+{
+	Mat img;
+	img = imread("C:\\Users\\ARANYA\\Desktop\\stuff\\IP\\proj\\pics\\4.png", CV_LOAD_IMAGE_GRAYSCALE);
+	
+	hough(img);
+	return 0;
+}
+
+

@@ -1,0 +1,22 @@
+Mat bin(Mat img)
+{
+
+	int m, n;
+	Mat img2 = grey(img);
+	cout << "Enter threshold: \n";
+	int a;
+	cin >> a;
+	for (m = 0; m < img2.rows; m++)
+
+	{
+		for (n = 0; n < img2.cols; n++)
+		{
+			if (img2.at<uchar>(m, n) <= a)
+				img2.at<uchar>(m, n) = 0;
+			else
+				img2.at<uchar>(m, n) = 255;
+
+		}
+	}
+	return img2;
+}

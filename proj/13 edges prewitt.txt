@@ -1,0 +1,57 @@
+// ComputerVision.cpp : Defines the entry point for the console application.
+//
+#include "stdafx.h"
+#include <iostream>
+#include <opencv2\core\core.hpp>
+#include <opencv2\highgui\highgui.hpp>
+#include <vector>
+#include <math.h>
+using namespace std;
+using namespace cv;
+
+Mat edge(Mat img)
+{
+	Mat img2(img.rows, img.cols, CV_8UC1, Scalar(0));
+	int x = 0, y = 0,val=0;
+	for (int r = 0; r < img.rows; r++)
+	{
+		for (int c = 0; c < img.cols; c++)
+		{
+			if (r == 0 || c == 0 || r == img.rows - 1 || c == img.cols - 1)
+			{
+				
+				continue;
+			}
+			
+			x = img.at<uchar>(r - 1, c + 1) - img.at<uchar>(r - 1, c - 1) + 
+				img.at<uchar>(r , c + 1) - img.at<uchar>(r , c - 1) +
+				img.at<uchar>(r + 1, c + 1) - img.at<uchar>(r + 1, c - 1);
+
+			y = img.at<uchar>(r + 1, c - 1) - img.at<uchar>(r - 1, c - 1) +
+				img.at<uchar>(r + 1, c ) - img.at<uchar>(r - 1, c ) +
+				img.at<uchar>(r + 1, c + 1) - img.at<uchar>(r - 1, c + 1);
+
+			val =(int) sqrt(x*x + y*y);
+			if (val > 255)
+				img2.at<uchar>(r, c) = 255;
+			else
+				img2.at<uchar>(r, c) = val;
+		}
+	}
+	return img2;
+}
+
+int main()
+{
+	Mat img;
+	int thresh = 128;
+
+	namedWindow("my window", CV_WINDOW_FULLSCREEN);	
+	img = imread("C:\\Users\\ARANYA\\Desktop\\stuff\\IP\\proj\\pics\\butterfly.jpg", CV_LOAD_IMAGE_GRAYSCALE);
+	Mat img2 = edge(img);
+	imshow("my window", img2);
+	waitKey(0);
+	return 0;
+}
+
+

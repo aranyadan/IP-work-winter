@@ -1,0 +1,65 @@
+// ComputerVision.cpp : Defines the entry point for the console application.
+//
+#include "stdafx.h"
+#include <iostream>
+#include <opencv2\core\core.hpp>
+#include <opencv2\highgui\highgui.hpp>
+#include <vector>
+
+using namespace std;
+using namespace cv;
+
+Mat edge(Mat img, int thresh,int a)
+{
+	Mat img2(img.rows, img.cols, CV_8UC1, Scalar(0));
+	int m = 0, n = 255;
+	for (int r = 0; r < img.rows; r++)
+	{
+		for (int c = 0; c < img.cols; c++)
+		{
+			if (r == 0 || c == 0 || r == img.rows - 1 || c == img.cols - 1)
+			{
+				img2.at<uchar>(r, c) = 255;
+				continue;
+			}
+			m = 0; n = 255;
+			for (int k = r - 1; k <= r + 1; k++)
+			{
+				for (int l = c - 1; l <= c + 1; l++)
+				{
+					if ((int)img.at<Vec3b>(k, l)[a] > m)
+						m = (int)img.at<Vec3b>(k, l)[a];
+					if ((int)img.at<Vec3b>(k, l)[a] < n)
+						n = (int)img.at<Vec3b>(k, l)[a];
+				}
+			}
+			if ((m - n) >thresh)
+				img2.at<uchar>(r, c) = 255;
+		}
+	}
+	return img2;
+}
+
+int main()
+{
+	Mat img;
+	int thresh = 128;
+	int a=0;
+	namedWindow("my window", CV_WINDOW_FULLSCREEN);
+	createTrackbar("threshhold", "my window", &thresh, 255);
+	createTrackbar("channel", "my window", &a, 2);
+	while (1)
+	{
+		img = imread("C:\\Users\\ARANYA\\Desktop\\stuff\\IP\\proj\\pics\\butterfly.jpg", CV_LOAD_IMAGE_COLOR);
+		Mat img2 = edge(img, thresh,a);
+		imshow("my window", img2);
+		char a = waitKey(33);
+		if (a == 27)
+			break;
+	}
+
+
+	return 0;
+}
+
+

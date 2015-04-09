@@ -1,0 +1,87 @@
+// ComputerVision.cpp : Defines the entry point for the console application.
+//
+#include "stdafx.h"
+#include <iostream>
+#include <opencv2\core\core.hpp>
+#include <opencv2\highgui\highgui.hpp>
+#include <vector>
+#include <math.h>
+#include  <opencv2\imgproc\imgproc.hpp>
+using namespace std;
+using namespace cv;
+Mat grey(Mat img)
+{
+
+	int m, n;
+
+	Mat img2(img.rows, img.cols, CV_8UC1);
+	for (m = 0; m < img.rows; m++)
+	{
+		for (n = 0; n < img.cols; n++)
+		{
+			img2.at<uchar>(m, n) = (56 * img.at<Vec3b>(m, n)[0] + 33 * img.at<Vec3b>(m, n)[1] + 11 * img.at<Vec3b>(m, n)[2]) / 100;
+
+		}
+	}
+	return img2;
+}
+Mat edge(Mat img, int thresh)
+{
+	Mat img2(img.rows, img.cols, CV_8UC1, Scalar(0));
+	int m = 0, n = 255;
+	for (int r = 0; r < img.rows; r++)
+	{
+		for (int c = 0; c < img.cols; c++)
+		{
+			if (r == 0 || c == 0 || r == img.rows - 1 || c == img.cols - 1)
+			{
+				img2.at<uchar>(r, c) = 255;
+				continue;
+			}
+			m = 0; n = 255;
+			for (int k = r - 1; k <= r + 1; k++)
+			{
+				for (int l = c - 1; l <= c + 1; l++)
+				{
+					if ((int)img.at<uchar>(k, l) > m)
+						m = (int)img.at<uchar>(k, l);
+					if ((int)img.at<uchar>(k, l) < n)
+						n = (int)img.at<uchar>(k, l);
+				}
+			}
+			if ((m - n) >thresh)
+				img2.at<uchar>(r, c) = 255;
+		}
+	}
+	return img2;
+}
+
+int main()
+{
+	int thresh = 8;
+	int l = 45, u = 67;
+	namedWindow("normalwindow", CV_WINDOW_FULLSCREEN);
+	namedWindow("Canny", CV_WINDOW_FULLSCREEN);
+	createTrackbar("thresh", "normalwindow", &thresh, 255);
+	createTrackbar("upper","Canny",&u,255);
+	createTrackbar("lower", "Canny", &l, 255);
+	Mat frame,frame1, frame2;
+	VideoCapture v(0);
+	
+	while (1)
+	{
+		v >> frame;
+		frame = grey(frame);
+		frame1 = edge(frame,thresh);
+		imshow("normalwindow", frame1);
+		Mat frame2(frame.rows, frame.cols, CV_8UC1);
+		Canny(frame, frame2, l, u);
+		imshow("Canny", frame2);
+		char  a=waitKey(3);
+		if (a == 27)
+			break;
+	}
+	return 0;
+}
+
+

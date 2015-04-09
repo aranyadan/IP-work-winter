@@ -1,0 +1,54 @@
+// ComputerVision.cpp : Defines the entry point for the console application.
+//
+
+#include "stdafx.h"
+#include <iostream>
+#include <opencv2\core\core.hpp>
+#include <opencv2\highgui\highgui.hpp>
+#include <queue>
+#include  <opencv2\imgproc\imgproc.hpp>
+#include<vector>
+#include <math.h>
+using namespace std;
+using namespace cv;
+
+Mat detect(Mat img1, Mat img2,int thr)
+{
+	cvtColor(img1, img1, CV_BGR2GRAY);
+	cvtColor(img2, img2, CV_BGR2GRAY);
+	Mat img(img1.rows, img1.cols, CV_8UC1);
+	for (int i = 0; i < img.rows; i++)
+	{
+		for (int j = 0; j < img.cols; j++)
+		{
+			img.at<uchar>(i, j) = abs(img1.at<uchar>(i, j) - img2.at<uchar>(i, j));
+		}
+	}
+	threshold(img, img, thr, 255, THRESH_BINARY_INV);
+	return img;
+}
+int main()
+{
+	Mat frame1,frame2,frame;
+	int thr = 16;
+	VideoCapture v(0);
+	v >> frame1;
+	v >> frame2;
+	//v >> frame2;
+	namedWindow("my window", CV_WINDOW_NORMAL);
+	createTrackbar("threshold", "my window", &thr, 254);
+	while (1)
+	{
+		frame = detect(frame1, frame2,thr);
+		imshow("my window", frame);
+		frame1 = frame2.clone();
+		v >> frame2;
+		//v >> frame2;
+		char a = waitKey(33);
+		if (a == 27)
+			break;
+	}
+	return 0;
+}
+
+

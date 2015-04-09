@@ -1,0 +1,70 @@
+// ComputerVision.cpp : Defines the entry point for the console application.
+//
+#include "stdafx.h"
+#include <iostream>
+#include <opencv2\core\core.hpp>
+#include <opencv2\highgui\highgui.hpp>
+#include <vector>
+//#include "binary.h"
+//#include "histogram.h"
+#include "greyscaling.h"
+using namespace std;
+using namespace cv;
+
+
+Mat grey(Mat img)
+{
+	int m, n;
+	Mat img2(img.rows, img.cols, CV_8UC1);
+	for (m = 0; m < img.rows; m++)
+	{
+		for (n = 0; n < img.cols; n++)
+		{
+			img2.at<uchar>(m, n) = (56 * img.at<Vec3b>(m, n)[0] + 33 * img.at<Vec3b>(m, n)[1] + 11 * img.at<Vec3b>(m, n)[2]) / 100;
+
+		}
+	}
+	return img2;
+}
+
+
+Mat bin(Mat img, int a)
+{
+
+	int m, n;
+	Mat img2 = grey(img);
+	
+	for (m = 0; m < img2.rows; m++)
+	{
+		for (n = 0; n < img2.cols; n++)
+		{
+			if (img2.at<uchar>(m,n) < a)
+				img2.at<uchar>(m,n) = 0;
+			else
+				img2.at<uchar>(m,n) = 255;
+		}
+	}
+	return img2;
+}
+
+
+int main()
+{
+	Mat img;
+	int a=0;
+	img = imread("C:\\Users\\ARANYA\\Desktop\\stuff\\IP\\proj\\pics\\butterfly.jpg", CV_LOAD_IMAGE_COLOR);
+	
+	namedWindow("my window", CV_WINDOW_NORMAL);
+	createTrackbar("bar1", "my window", &a, 255);
+	while (1)
+	{
+		Mat img2 = bin(img, a);
+		imshow("my window", img2);
+		char a=waitKey(33);
+		if (a == 27)
+			break;
+	}
+	return 0;
+}
+
+

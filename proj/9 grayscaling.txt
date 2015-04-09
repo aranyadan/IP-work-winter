@@ -1,0 +1,51 @@
+// ComputerVision.cpp : Defines the entry point for the console application.
+//
+#include "stdafx.h"
+#include <iostream>
+#include <opencv2\core\core.hpp>
+#include <opencv2\highgui\highgui.hpp>
+#include <vector>
+//#include "binary.h"
+//#include "histogram.h"
+#include "greyscaling.h"
+using namespace std;
+using namespace cv;
+
+Mat grey(Mat img,int b,int g)
+{
+
+	int m, n;
+
+	Mat img2(img.rows, img.cols, CV_8UC1);
+	for (m = 0; m < img.rows; m++)
+	{
+		for (n = 0; n < img.cols; n++)
+		{
+			img2.at<uchar>(m, n) = (b * img.at<Vec3b>(m, n)[0] + g * img.at<Vec3b>(m, n)[1] + (100-b-g) * img.at<Vec3b>(m, n)[2]) / 100;
+
+		}
+	}
+	return img2;
+}
+int main()
+{
+	Mat img;
+	int b=0,g=0;
+	img = imread("C:\\Users\\ARANYA\\Desktop\\stuff\\IP\\proj\\pics\\butterfly.jpg", CV_LOAD_IMAGE_COLOR);
+	
+	namedWindow("my window", CV_WINDOW_NORMAL);
+	createTrackbar("blue", "my window", &b, 100);
+	createTrackbar("green", "my window", &g, 100-b);
+	
+	while (1)
+	{
+		Mat img2 = grey(img, b,g);
+		imshow("my window", img2);
+		char a=waitKey(33);
+		if (a == 27)
+			break;
+	}
+	return 0;
+}
+
+

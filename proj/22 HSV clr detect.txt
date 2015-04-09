@@ -1,0 +1,58 @@
+// ComputerVision.cpp : Defines the entry point for the console application.
+//
+#include "stdafx.h"
+#include <iostream>
+#include <opencv2\core\core.hpp>
+#include <opencv2\highgui\highgui.hpp>
+#include <opencv2\imgproc\imgproc.hpp>
+#include <vector>
+using namespace std;
+using namespace cv;
+
+
+
+
+
+Mat bin(Mat img, int a, int hue)
+{
+
+	int m, n;
+	Mat img2(img.rows, img.cols, CV_8UC1);
+	for (m = 0; m < img.rows; m++)
+	{
+		for (n = 0; n < img.cols; n++)
+		{
+			if (img.at<Vec3b>(m, n)[0] < (int)(hue*(100 + a) / 100) && img.at<Vec3b>(m, n)[0] >(int)(hue*(100 - a) / 100))
+				img2.at<uchar>(m, n) = 255;
+			else
+				img2.at<uchar>(m, n) = 0;
+		}
+	}
+	return img2;
+}
+
+
+int main()
+{
+	Mat img, img2;
+	int m = 100, n, a = 5;
+	img = imread("C:\\Users\\ARANYA\\Desktop\\stuff\\IP\\proj\\pics\\3.png", CV_LOAD_IMAGE_COLOR);
+	namedWindow("hsv", CV_WINDOW_FULLSCREEN);
+	cvtColor(img, img2, CV_BGR2HSV);
+
+	cvCreateTrackbar("tolerence", "hsv", &a, 100);
+	cvCreateTrackbar("hue", "hsv", &m, 360);
+	while (1)
+	{
+		img = imread("C:\\Users\\ARANYA\\Desktop\\stuff\\IP\\proj\\pics\\3.png", CV_LOAD_IMAGE_COLOR);
+		cvtColor(img, img2, CV_BGR2HLS);
+		img2 = bin(img2, a, m);
+		imshow("hsv", img2);
+		char a = waitKey(33);
+		if (a == 27)
+			break;
+	}
+	return 0;
+}
+
+

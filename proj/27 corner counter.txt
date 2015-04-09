@@ -1,0 +1,34 @@
+
+#include "stdafx.h"
+#include <iostream>
+#include <opencv2\core\core.hpp>
+#include <opencv2\highgui\highgui.hpp>
+#include <queue>
+#include  <opencv2\imgproc\imgproc.hpp>
+#include <vector>
+using namespace std;
+using namespace cv;
+
+int main()
+{
+	Mat img;
+	img = imread("C:\\Users\\ARANYA\\Desktop\\stuff\\IP\\proj\\pics\\2.png", CV_LOAD_IMAGE_GRAYSCALE);
+	vector<vector<Point>> v;
+	vector<vector<Point>> app;
+	findContours(img, v, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE);
+	for (int i = 0; i < v.size(); i++)
+	{
+		app.push_back(v[i]);
+		approxPolyDP(v[i], app[i], arcLength(v[i], true)*0.02, true);
+	}
+	namedWindow("my window", CV_WINDOW_NORMAL);
+	imshow("my window", img);
+	for (int i = 0; i <app.size(); i++)
+	{
+		cout << app[i].size() << " ";
+	}
+	waitKey(0);
+	return 0;
+}
+
+

@@ -1,0 +1,32 @@
+Mat dilate(Mat img)
+{
+	Mat img2(img.rows, img.cols, CV_8UC1, Scalar(0));
+	int b = 0, w = 0;
+	for (int r = 0; r < img.rows; r++)
+	{
+		for (int c = 0; c < img.cols; c++)
+		{
+			if (r == 0 || c == 0 || r == img.rows - 1 || c == img.cols - 1)
+			{
+				
+				continue;
+			}
+			b = 0; w = 0;
+			for (int k = r - 1; k <= r + 1; k++)
+			{
+				for (int l = c - 1; l <= c + 1; l++)
+				{
+					if ((int)img.at<uchar>(k, l) == 0)
+						b++;
+					else
+						w++;
+				}
+			}
+			if (b>w)
+				img2.at<uchar>(r, c) = 0;
+			else
+				img2.at<uchar>(r, c) = 255;
+		}
+	}
+	return img2;
+}

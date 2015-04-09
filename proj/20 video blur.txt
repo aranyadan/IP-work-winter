@@ -1,0 +1,158 @@
+// ComputerVision.cpp : Defines the entry point for the console application.
+//
+#include "stdafx.h"
+#include <iostream>
+#include <opencv2\core\core.hpp>
+#include <opencv2\highgui\highgui.hpp>
+#include <vector>
+#include <math.h>
+using namespace std;
+using namespace cv;
+Mat grey(Mat img)
+{
+
+	int m, n;
+
+	Mat img2(img.rows, img.cols, CV_8UC1);
+	for (m = 0; m < img.rows; m++)
+	{
+		for (n = 0; n < img.cols; n++)
+		{
+			img2.at<uchar>(m, n) = (56 * img.at<Vec3b>(m, n)[0] + 33 * img.at<Vec3b>(m, n)[1] + 11 * img.at<Vec3b>(m, n)[2]) / 100;
+
+		}
+	}
+	return img2;
+}
+Mat blurmean(Mat img)
+{
+	Mat img2(img.rows, img.cols, CV_8UC1, Scalar(0));
+	int val = 0;
+	for (int r = 0; r < img.rows; r++)
+	{
+		for (int c = 0; c < img.cols; c++)
+		{
+			if (r == 0 || c == 0 || r == img.rows - 1 || c == img.cols - 1)
+			{
+
+				continue;
+			}
+			val = 0;
+
+			for (int k = r - 1; k <= r + 1; k++)
+			{
+				for (int l = c - 1; l <= c + 1; l++)
+				{
+					val += img.at<uchar>(k, l);
+				}
+			}
+			img2.at<uchar>(r, c) = val / 9;
+		}
+	}
+	return img2;
+}
+Mat blurgauss(Mat img)
+{
+	Mat img2(img.rows, img.cols, CV_8UC1, Scalar(0));
+	float val = 0;
+	for (int r = 0; r < img.rows; r++)
+	{
+		for (int c = 0; c < img.cols; c++)
+		{
+			if (r == 0 || c == 0 || r == img.rows - 1 || c == img.cols - 1)
+			{
+
+				continue;
+			}
+			val = 0;
+
+			for (int k = r - 1; k <= r + 1; k++)
+			{
+				for (int l = c - 1; l <= c + 1; l++)
+				{
+					if ((k - r == -1 || k - r == 1) && (l - c == -1 || l - c == 1))
+						val += 0.06*img.at<uchar>(k, l);
+
+					else if (((k - r == -1 || k - r == 1) && (l - c == 0)) || ((k - r == 0) && (l - c == -1 || l - c == 1)))
+						val += 0.098*img.at<uchar>(k, l);
+
+					else if ((k - r == 0) && (l - c == 0))
+						val += 0.162*img.at<uchar>(k, l);
+				}
+			}
+			img2.at<uchar>(r, c) = (int)(val / .794);
+		}
+	}
+	return img2;
+}
+Mat blurmed(Mat img)
+{
+	Mat img2(img.rows, img.cols, CV_8UC1, Scalar(0));
+	int val[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	int y = 0;
+	for (int r = 0; r < img.rows; r++)
+	{
+		for (int c = 0; c < img.cols; c++)
+		{
+			if (r == 0 || c == 0 || r == img.rows - 1 || c == img.cols - 1)
+			{
+
+				continue;
+			}
+			for (int x = 0; x < 9; x++)
+				val[x] = 0;
+			y = 0;
+
+			for (int k = r - 1; k <= r + 1; k++)
+			{
+				for (int l = c - 1; l <= c + 1; l++)
+				{
+					val[y++] = (int)img.at<uchar>(k, l);
+				}
+			}
+			int temp = 0;
+			for (int k = 0; k < 9; k++)
+			{
+				for (int l = 0; l < 9 - k - 1; l++)
+				{
+					if (val[l]>val[l + 1])
+					{
+						temp = val[l];
+						val[l] = val[l + 1];
+						val[l + 1] = temp;
+					}
+				}
+			}
+			img2.at<uchar>(r, c) = val[4];
+		}
+	}
+	return img2;
+}
+int main()
+{
+	Mat frame,frame2,frame3,frame4;
+	int thresh = 128;
+
+	namedWindow("original", CV_WINDOW_NORMAL);
+	namedWindow("mean", CV_WINDOW_NORMAL);
+	namedWindow("median", CV_WINDOW_NORMAL);
+	namedWindow("gaussian", CV_WINDOW_NORMAL);
+	VideoCapture v(0);
+	while (1)
+	{
+		v >> frame;
+		frame = grey(frame);
+		imshow("original", frame);
+		frame2 = blurgauss(frame);
+		imshow("gaussian", frame2);
+		frame3 = blurmean(frame);
+		imshow("mean", frame3);
+		frame4 = blurmed(frame);
+		imshow("median", frame4);
+		char a=waitKey(10);
+		if (a == 27)
+			break;
+	}
+	return 0;
+}
+

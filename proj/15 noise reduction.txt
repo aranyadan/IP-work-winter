@@ -1,0 +1,139 @@
+// ComputerVision.cpp : Defines the entry point for the console application.
+//
+#include "stdafx.h"
+#include <iostream>
+#include <opencv2\core\core.hpp>
+#include <opencv2\highgui\highgui.hpp>
+#include <vector>
+
+using namespace std;
+using namespace cv;
+
+Mat edge(Mat img, int thresh)
+{
+	Mat img2(img.rows, img.cols, CV_8UC1, Scalar(0));
+	int m = 0, n = 255;
+	for (int r = 0; r < img.rows; r++)
+	{
+		for (int c = 0; c < img.cols; c++)
+		{
+			if (r == 0 || c == 0 || r == img.rows - 1 || c == img.cols - 1)
+			{
+				img2.at<uchar>(r, c) = 255;
+				continue;
+			}
+			m = 0; n = 255;
+			for (int k = r - 1; k <= r + 1; k++)
+			{
+				for (int l = c - 1; l <= c + 1; l++)
+				{
+					if ((int)img.at<uchar>(k, l) > m)
+						m = (int)img.at<uchar>(k, l);
+					if ((int)img.at<uchar>(k, l) < n)
+						n = (int)img.at<uchar>(k, l);
+				}
+			}
+			if ((m - n) >thresh)
+				img2.at<uchar>(r, c) = 255;
+		}
+	}
+	return img2;
+}
+Mat dilate(Mat img)
+{
+	Mat img2(img.rows, img.cols, CV_8UC1, Scalar(0));
+	int b = 0, w = 0;
+	for (int r = 0; r < img.rows; r++)
+	{
+		for (int c = 0; c < img.cols; c++)
+		{
+			if (r == 0 || c == 0 || r == img.rows - 1 || c == img.cols - 1)
+			{
+				
+				continue;
+			}
+			b = 0; w = 0;
+			for (int k = r - 1; k <= r + 1; k++)
+			{
+				for (int l = c - 1; l <= c + 1; l++)
+				{
+					if ((int)img.at<uchar>(k, l) == 0)
+						b++;
+					else
+						w++;
+				}
+			}
+			if (b>w)
+				img2.at<uchar>(r, c) = 0;
+			else
+				img2.at<uchar>(r, c) = 255;
+		}
+	}
+	return img2;
+}
+Mat erode(Mat img)
+{
+	Mat img2(img.rows, img.cols, CV_8UC1, Scalar(0));
+	int b = 0, w = 0;
+	for (int r = 0; r < img.rows; r++)
+	{
+		for (int c = 0; c < img.cols; c++)
+		{
+			if (r == 0 || c == 0 || r == img.rows - 1 || c == img.cols - 1)
+			{
+
+				continue;
+			}
+			b = 0; w = 0;
+			for (int k = r - 1; k <= r + 1; k++)
+			{
+				for (int l = c - 1; l <= c + 1; l++)
+				{
+					if ((int)img.at<uchar>(k, l) == 0)
+						b++;
+					else
+						w++;
+				}
+			}
+			if (b == 0 || w == 0)
+			{
+				img2.at<uchar>(r, c) = img.at<uchar>(r, c);
+				continue;
+			}
+			if (b>w)
+				img2.at<uchar>(r, c) = 255;
+			else if (w>b)
+				img2.at<uchar>(r, c) = 0;
+			//else img2.at<uchar>(r, c) = img.at<uchar>(r, c);
+		}
+	}
+	return img2;
+}
+int main()
+{
+	Mat img;
+	int thresh = 38;
+
+	namedWindow("my window", CV_WINDOW_FULLSCREEN);
+	namedWindow("my window2", CV_WINDOW_FULLSCREEN);
+	namedWindow("my window3", CV_WINDOW_FULLSCREEN);
+	createTrackbar("bar1", "my window", &thresh, 255);
+	while (1)
+	{
+		img = imread("C:\\Users\\ARANYA\\Desktop\\stuff\\IP\\proj\\pics\\butterfly.jpg", CV_LOAD_IMAGE_GRAYSCALE);
+		Mat img2 = edge(img, thresh);
+		imshow("my window", img2);
+		img2 = dilate(img2);
+		imshow("my window2", img2);
+		img2 = erode(img2);
+		imshow("my window3", img2);
+		char a = waitKey(33);
+		if (a == 27)
+			break;
+	}
+
+
+	return 0;
+}
+
+

@@ -1,0 +1,40 @@
+// ComputerVision.cpp : Defines the entry point for the console application.
+//
+#include "stdafx.h"
+#include <iostream>
+#include <opencv2\core\core.hpp>
+#include <opencv2\highgui\highgui.hpp>
+#include <vector>
+
+using namespace std;
+using namespace cv;
+
+
+int main()
+{
+	Mat img, invert;
+	int m, n;
+	unsigned char temp[] = {0,0,0};
+	img = imread("C:\\Users\\ARANYA\\Desktop\\stuff\\IP\\proj\\pics\\butterfly.jpg", CV_LOAD_IMAGE_COLOR);
+	for (m = 0; m < img.rows / 2; m++)
+	{
+		for (n = 0; n < img.cols; n++)
+		{
+			temp[0] = img.at<Vec3b>(m, n)[0];
+			temp[1] = img.at<Vec3b>(m, n)[1];
+			temp[2] = img.at<Vec3b>(m, n)[2];
+			img.at<Vec3b>(m, n)[0] = img.at<Vec3b>(img.rows - 1 - m, n)[0];
+			img.at<Vec3b>(m, n)[1] = img.at<Vec3b>(img.rows - 1 - m, n)[1];
+			img.at<Vec3b>(m, n)[2] = img.at<Vec3b>(img.rows - 1 - m, n)[2];
+			img.at<Vec3b>(img.rows - m - 1, n)[0] = temp[0];
+			img.at<Vec3b>(img.rows - m - 1, n)[1] = temp[1];
+			img.at<Vec3b>(img.rows - m - 1, n)[2] = temp[2];
+		}
+	}
+	namedWindow("my window", CV_WINDOW_NORMAL);
+	imshow("my window", img);
+	waitKey(0);
+	return 0;
+}
+
+

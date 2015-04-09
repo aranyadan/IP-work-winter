@@ -1,0 +1,49 @@
+
+#include "stdafx.h"
+#include <iostream>
+#include <opencv2\core\core.hpp>
+#include <opencv2\highgui\highgui.hpp>
+#include <queue>
+#include  <opencv2\imgproc\imgproc.hpp>
+#include <vector>
+using namespace std;
+using namespace cv;
+
+int main()
+{
+	VideoCapture vid(0);
+	Mat frame;
+	int hh = 179, hl = 0, sh = 255, sl = 0, vh = 255, vl = 0;
+	namedWindow("control", CV_WINDOW_AUTOSIZE);
+
+	cvCreateTrackbar("hue H", "control", &hh, 179);
+	cvCreateTrackbar("hue L", "control", &hl, 179);
+
+	cvCreateTrackbar("S H", "control", &sh, 179);
+	cvCreateTrackbar("S L", "control", &sl, 179);
+
+	cvCreateTrackbar("V H", "control", &vh, 179);
+	cvCreateTrackbar("V L", "control", &vl, 179);
+
+	while (1)
+	{
+		vid >> frame;
+		Mat frame2;
+		cvtColor(frame, frame2, COLOR_BGR2HSV);
+		Mat thresh;
+		inRange(frame2, Scalar(hl, sl, vl), Scalar(hh, sh, vh), thresh);
+
+		erode(thresh, thresh, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)));
+		dilate(thresh, thresh, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)));
+
+		dilate(thresh, thresh, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)));
+		erode(thresh, thresh, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)));
+
+		imshow("window 2", thresh);
+		imshow("original", frame);
+		if (waitKey(30) == 27)
+			break;
+
+	}
+	return 0;
+}

@@ -1,0 +1,16 @@
+Mat printpixel(Mat img, int **a, int count)					//prints the lowest pixel of each blob, returns the mat img
+{															//containing only those pixels
+	Mat img2(img.rows, img.cols, CV_8UC1, Scalar(0));
+	for (int k = 0; k < count; k++)
+	{
+		for (int i = 0; i < img.rows; i++)
+		{
+			for (int j = 0; j < img.cols; j++)
+			{
+				if (a[k][1] == i && a[k][2] == j)
+					img2.at<uchar>(i, j) = 255;
+			}
+		}
+	}
+	return img2;
+}

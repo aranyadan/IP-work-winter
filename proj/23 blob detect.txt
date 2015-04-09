@@ -1,0 +1,96 @@
+// ComputerVision.cpp : Defines the entry point for the console application.
+//
+#include "stdafx.h"
+#include <iostream>
+#include <opencv2\core\core.hpp>
+#include <opencv2\highgui\highgui.hpp>
+#include <queue>
+
+using namespace std;
+using namespace cv;
+
+void blobit(Mat img)
+{
+	int **a =(int **) malloc(img.rows*sizeof(int*));
+	for (int m = 0; m < img.rows; m++)
+	{
+		a[m] = (int *)malloc(img.cols*sizeof(int));
+	}
+	for (int k = 0; k < img.rows; k++)
+	{
+		for (int l = 0; l < img.cols; l++)
+		{
+			a[k][l] = -1;
+		}
+	}
+
+	int num = 1,m,n;
+	queue<Point> q;
+	for (int r = 0; r < img.rows; r++)
+	{
+		for (int c = 0; c < img.cols; c++)
+		{
+			if (img.at<uchar>(r, c) == 255 && a[r][c] == -1)
+			{
+				Point p;
+				p.x = r;
+				p.y = c;
+				q.push(p);
+				a[r][c] = 0;
+				m = r; n = c;
+				while (1)
+				{
+					for (int k = m - 1; k <= m + 1; k++)
+					{
+						for (int l = n - 1; l <= n + 1; l++)
+						{
+							if (k<0 || l<0 || k>img.rows || l>img.cols)
+								continue;
+							if (img.at<uchar>(k,l) == 255 && a[k][l] == -1)
+							{
+								Point p;
+								p.x = k;
+								p.y = l;
+								q.push(p);
+								a[k][l] = 0;
+							}
+
+						}
+					}
+					a[m][n] = num;
+					q.pop();
+					if (q.empty() == true)
+						break;
+					Point z = q.front();
+					m = z.x;
+					n = z.y;
+				}
+				num++;
+			}
+			
+		}
+	}
+	Mat img2(img.rows, img.cols, CV_8UC1,Scalar(0));
+	for (int r = 0; r < img.rows; r++)
+	{
+		for (int c = 0; c < img.cols; c++)
+		{
+			if (a[r][c] !=-1)
+				img2.at<uchar>(r, c) = 255/a[r][c];
+		}
+	}
+	namedWindow("my window", CV_WINDOW_FULLSCREEN);
+	imshow("my window", img2);
+	
+}
+int main()
+{
+	Mat img;
+	img = imread("C:\\Users\\ARANYA\\Desktop\\stuff\\IP\\proj\\pics\\2.png", CV_LOAD_IMAGE_GRAYSCALE);
+	
+	blobit(img);
+	waitKey(0);
+	return 0;
+}
+
+

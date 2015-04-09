@@ -1,0 +1,61 @@
+// ComputerVision.cpp : Defines the entry point for the console application.
+//
+#include "stdafx.h"
+#include <iostream>
+#include <opencv2\core\core.hpp>
+#include <opencv2\highgui\highgui.hpp>
+#include <vector>
+
+using namespace std;
+using namespace cv;
+
+Mat change(Mat img, int b, int g, int r)
+{
+	//Mat img2(img.rows, img.cols, CV_8UC1);
+	for (int m = 0; m < img.rows; m++)
+	{
+		for (int n = 0; n < img.cols; n++)
+		{
+			if (img.at<Vec3b>(m, n)[0] <= b)
+				img.at<Vec3b>(m, n)[0] = 0;
+			else
+				img.at<Vec3b>(m, n)[0] = 255;
+
+			if (img.at<Vec3b>(m, n)[1] <= g)
+				img.at<Vec3b>(m, n)[1] = 0;
+			else
+				img.at<Vec3b>(m, n)[1] = 255;
+			
+			if (img.at<Vec3b>(m, n)[2] <= r)
+				img.at<Vec3b>(m, n)[2] = 0;
+			else
+				img.at<Vec3b>(m, n)[2] = 255;
+		}
+	}
+	return img;
+}
+
+int main()
+{
+	Mat img;
+	int b=0,g=0,r=0;
+	img = imread("C:\\Users\\ARANYA\\Desktop\\stuff\\IP\\proj\\pics\\butterfly.jpg", CV_LOAD_IMAGE_COLOR);
+	
+	namedWindow("my window", CV_WINDOW_AUTOSIZE);
+	createTrackbar("blue", "my window", &b, 255);
+	createTrackbar("green", "my window", &g, 255);
+	createTrackbar("red", "my window", &r, 255);
+	
+	while (1)
+	{
+		img = imread("C:\\Users\\ARANYA\\Desktop\\stuff\\IP\\proj\\pics\\butterfly.jpg", CV_LOAD_IMAGE_COLOR);
+		Mat img2 = change(img, b,g,r);
+		imshow("my window", img2);
+		char a=waitKey(33);
+		if (a == 27)
+			break;
+	}
+	return 0;
+}
+
+

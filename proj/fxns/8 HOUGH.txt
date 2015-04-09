@@ -1,0 +1,33 @@
+int ** hough(Mat img)
+{
+
+	int count = (int)sqrt(img.rows*img.rows + img.cols*img.cols) + 1;
+
+	int **a = (int **)malloc(count*sizeof(int*));
+	for (int m = 0; m < count; m++)
+	{
+		a[m] = (int *)malloc(200 * sizeof(int));
+	}
+	for (int k = 0; k < count; k++)
+	{
+		for (int l = 0; l < 181; l++)
+		{
+			a[k][l] = 0;
+		}
+	}
+	for (int m = 0; m < img.rows; m++)
+	{
+		for (int n = 0; n<img.cols; n++)
+		{
+			if (img.at<uchar>(m, n) == 255)
+			{
+				update(img, m, n, a, count);
+			}
+		}
+	}
+
+
+	return a;
+
+	waitKey(0);
+}

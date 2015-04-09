@@ -1,0 +1,45 @@
+// ComputerVision.cpp : Defines the entry point for the console application.
+//
+#include "stdafx.h"
+#include <iostream>
+#include <opencv2\core\core.hpp>
+#include <opencv2\highgui\highgui.hpp>
+
+using namespace std;
+using namespace cv;
+
+
+int main()
+{
+	Mat img(100,100,CV_8UC3);
+	for (int m = 0; m < 100; m++)
+	{
+		for (int n = 0; n < 100; n++)
+		{
+			if (m <= 33)
+			{
+				img.at<Vec3b>(m, n)[0] = 0;
+				img.at<Vec3b>(m, n)[1] = 165;
+				img.at<Vec3b>(m, n)[2] = 255;
+			}
+			if (m>33 && m <= 66)
+			{
+				img.at<Vec3b>(m, n)[0] = 255;
+				img.at<Vec3b>(m, n)[1] = 255;
+				img.at<Vec3b>(m, n)[2] = 255;
+			}
+			if (m>66)
+			{
+				img.at<Vec3b>(m, n)[0] = 0;
+				img.at<Vec3b>(m, n)[1] = 255;
+				img.at<Vec3b>(m, n)[2] = 0;
+			}
+		}
+	}
+	namedWindow("my window", CV_WINDOW_NORMAL);
+	imshow("my window", img);
+	waitKey(0);
+	return 0;
+}
+
+

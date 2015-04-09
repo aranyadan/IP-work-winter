@@ -1,0 +1,103 @@
+// ComputerVision.cpp : Defines the entry point for the console application.
+//
+#include "stdafx.h"
+#include <iostream>
+#include <opencv2\core\core.hpp>
+#include <opencv2\highgui\highgui.hpp>
+#include <vector>
+//#include "binary.h"
+//#include "histogram.h"
+#include "greyscaling.h"
+using namespace std;
+using namespace cv;
+
+
+Mat grey(Mat img)
+{
+	int m, n;
+	Mat img2(img.rows, img.cols, CV_8UC1);
+	for (m = 0; m < img.rows; m++)
+	{
+		for (n = 0; n < img.cols; n++)
+		{
+			img2.at<uchar>(m, n) = (56 * img.at<Vec3b>(m, n)[0] + 33 * img.at<Vec3b>(m, n)[1] + 11 * img.at<Vec3b>(m, n)[2]) / 100;
+
+		}
+	}
+	return img2;
+}
+
+int hist(Mat img)
+{
+	int freq[256];
+	for (int m = 0; m < 256; m++)
+		freq[m] = 0;
+	for (int m = 0; m < img.rows; m++)
+	{
+		for (int n = 0; n < img.cols; n++)
+		{
+			freq[(int)img.at<uchar>(m, n)]++;
+		}
+	}
+	int sum = 0, sum2 = 0; int k;
+	for (k = 0; k < 256; k++)
+	{
+		if (sum2 >= img.rows*img.cols / 2)
+			break;
+		sum2 += freq[k];
+	}
+	int max = 0;
+	for (int m = 0; m < 256; m++)
+	{
+		freq[m] /= 100;
+		if (max < freq[m])
+			max = freq[m];
+	}
+	Mat img2(max, 256, CV_8SC1,Scalar(255));
+	for (int m = 0; m < img2.cols; m++)
+	{
+		for (int n = 0; n < max-freq[m]; n++)
+		{
+			img2.at<uchar>(n, m) = 0;
+		}
+	}
+	namedWindow("my window2", CV_WINDOW_NORMAL);
+	imshow("my window2", img2);
+	
+	return k;
+}
+Mat bin(Mat img, int a)
+{
+
+	int m, n;
+	Mat img2 = grey(img);
+	//Mat img3(img2.size(),img2.type());
+	for (m = 0; m < img2.rows; m++)
+	{
+		for (n = 0; n < img2.cols; n++)
+		{
+			if (img2.at<uchar>(m,n) < a)
+				img2.at<uchar>(m,n) = 0;
+			else
+				img2.at<uchar>(m,n) = 255;
+		}
+	}
+	return img2;
+}
+
+
+int main()
+{
+	Mat img;
+	int m, n;
+	img = imread("C:\\Users\\ARANYA\\Desktop\\stuff\\IP\\proj\\pics\\butterfly.jpg", CV_LOAD_IMAGE_COLOR);
+	Mat img2 = grey(img);
+	int a = hist(img2);
+	img2 = bin(img, a);
+	namedWindow("my window", CV_WINDOW_NORMAL);
+	imshow("my window", img2);
+	waitKey(0);
+	return 0;
+}
+
+

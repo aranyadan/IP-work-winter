@@ -1,0 +1,189 @@
+// ComputerVision.cpp : Defines the entry point for the console application.
+//
+#include "stdafx.h"
+#include <iostream>
+#include <opencv2\core\core.hpp>
+#include <opencv2\highgui\highgui.hpp>
+#include <math.h>
+#include <queue>
+
+using namespace std;
+using namespace cv;
+int ** blobit(Mat img)
+{
+	int **a = (int **)malloc(img.rows*sizeof(int*));
+	for (int m = 0; m < img.rows; m++)
+	{
+		a[m] = (int *)malloc(img.cols*sizeof(int));
+	}
+	for (int k = 0; k < img.rows; k++)
+	{
+		for (int l = 0; l < img.cols; l++)
+		{
+			a[k][l] = -1;
+		}
+	}
+
+	int num = 1, m, n;
+	queue<Point> q;
+	for (int r = 0; r < img.rows; r++)
+	{
+		for (int c = 0; c < img.cols; c++)
+		{
+			if (img.at<uchar>(r, c) == 255 && a[r][c] == -1)
+			{
+				Point p;
+				p.x = r;
+				p.y = c;
+				q.push(p);
+				a[r][c] = 0;
+				m = r; n = c;
+				while (1)
+				{
+					for (int k = m - 1; k <= m + 1; k++)
+					{
+						for (int l = n - 1; l <= n + 1; l++)
+						{
+							if (k<0 || l<0 || k>img.rows || l>img.cols)
+								continue;
+							if (img.at<uchar>(k, l) == 255 && a[k][l] == -1)
+							{
+								Point p;
+								p.x = k;
+								p.y = l;
+								q.push(p);
+								a[k][l] = 0;
+							}
+
+						}
+					}
+					a[m][n] = num;
+					q.pop();
+					if (q.empty() == true)
+						break;
+					Point z = q.front();
+					m = z.x;
+					n = z.y;
+				}
+				num++;
+			}
+
+		}
+	}
+	return a;
+
+}
+void goprint(int **a,Mat img,int **b)
+{
+	int count = (int)sqrt(img.rows*img.rows + img.cols*img.cols) + 1;
+	int max = 0, maxr, maxc;
+	int th = 80;
+	namedWindow("my wind", CV_WINDOW_AUTOSIZE);
+	createTrackbar("thresh", "my wind", &th, 1000);
+	int tol = 2;
+	int c = 1;
+	while (1)
+	{
+		Mat img3(img.rows, img.cols, CV_8UC1, Scalar(0));
+		int id = 0;
+		for (int k = 0; k < count; k++)
+		{
+			for (int l = 0; l < 181; l++)
+			{
+				if (a[k][l]>th)
+				{
+					maxr = k;
+					maxc = l;
+					int c = 0;
+					for (int i = 0; i < img.rows; i++)
+					{
+						for (int j = 0; j < img.cols; j++)
+						{
+							int v = img.at<uchar>(i, j);
+
+							if (v == 0 )
+								continue;
+							if (c==0 && maxr >= (i*sin(maxc*3.14 / 180) + j*cos(maxc*3.14 / 180))* (100 - tol) / 100 && maxr < (i*sin(maxc*3.14 / 180) + j*cos(maxc*3.14 / 180))* (100 + tol) / 100)
+							{
+								img3.at<uchar>(i, j) = 255;
+								c++; id = b[i][j];
+								continue;
+							}
+							if (b[i][j]==id && maxr >= (i*sin(maxc*3.14 / 180) + j*cos(maxc*3.14 / 180))* (100 - tol) / 100 && maxr < (i*sin(maxc*3.14 / 180) + j*cos(maxc*3.14 / 180))* (100 + tol) / 100)
+							{
+								img3.at<uchar>(i, j) = 255;
+								continue;
+							}
+						}
+					}
+				}
+			}
+		}
+		imshow("my wind", img3);
+		char a = waitKey(33);
+		if (a == 27)
+			break;
+		
+	}
+	
+	
+
+	
+
+}
+void update(Mat img, int r, int c, int **a, int size)
+{
+	for (int j = 0; j < 181; j++)
+	{
+		int l = (int)(r*sin(j*3.14 / 180) + c*cos(j*3.14 / 180)) + 1;
+		if (l < 0)
+			l *= -1;
+		a[l][j] ++;
+	}
+
+}
+int ** hough(Mat img)
+{
+
+	int count = (int)sqrt(img.rows*img.rows + img.cols*img.cols) + 1;
+
+	int **a = (int **)malloc(count*sizeof(int*));
+	for (int m = 0; m < count; m++)
+	{
+		a[m] = (int *)malloc(200 * sizeof(int));
+	}
+	for (int k = 0; k < count; k++)
+	{
+		for (int l = 0; l < 181; l++)
+		{
+			a[k][l] = 0;
+		}
+	}
+	for (int m = 0; m < img.rows; m++)
+	{
+		for (int n = 0; n<img.cols; n++)
+		{
+			if (img.at<uchar>(m, n) == 255)
+			{
+				update(img, m, n, a, count);
+			}
+		}
+	}
+
+
+	return a;
+
+	waitKey(0);
+}
+int main()
+{
+	Mat img;
+	img = imread("C:\\Users\\ARANYA\\Desktop\\stuff\\IP\\proj\\pics\\4.png", CV_LOAD_IMAGE_GRAYSCALE);
+
+	int** a=hough(img);
+	int **b = blobit(img);
+	goprint(a,img,b);
+	return 0;
+}
+
+

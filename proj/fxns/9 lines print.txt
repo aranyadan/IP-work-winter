@@ -1,0 +1,46 @@
+void goprint(int **a,Mat img)
+{
+	int count = (int)sqrt(img.rows*img.rows + img.cols*img.cols) + 1;
+	int max = 0, maxr, maxc;
+	int th = 80;
+	namedWindow("my wind", CV_WINDOW_AUTOSIZE);
+	createTrackbar("thresh", "my wind", &th, 1000);
+	int tol = 2;
+	int c = 1;
+	while (1)
+	{
+		Mat img3(img.rows, img.cols, CV_8UC1, Scalar(0));
+		for (int k = 0; k < count; k++)
+		{
+			for (int l = 0; l < 181; l++)
+			{
+				if (a[k][l]>th)
+				{
+					maxr = k;
+					maxc = l;
+					for (int i = 0; i < img.rows; i++)
+					{
+						for (int j = 0; j < img.cols; j++)
+						{
+							int v = img.at<uchar>(i, j);
+							if (v == 0 )
+								continue;
+							if (maxr >= (i*sin(maxc*3.14 / 180) + j*cos(maxc*3.14 / 180))* (100 - tol) / 100 && maxr < (i*sin(maxc*3.14 / 180) + j*cos(maxc*3.14 / 180))* (100 + tol) / 100)
+								img3.at<uchar>(i, j) = 255;
+						}
+					}
+				}
+			}
+		}
+		imshow("my wind", img3);
+		char a = waitKey(33);
+		if (a == 27)
+			break;
+		
+	}
+	
+	
+
+	
+
+}

@@ -1,0 +1,37 @@
+// ComputerVision.cpp : Defines the entry point for the console application.
+//
+#include "stdafx.h"
+#include <iostream>
+#include <opencv2\core\core.hpp>
+#include <opencv2\highgui\highgui.hpp>
+
+using namespace std;
+using namespace cv;
+
+void CallBackFunc(int event, int x, int y, int flags, void* userdata)
+{
+	if (event == EVENT_LBUTTONDOWN)
+	{
+		cout << "LB at (" << x << "," << y << ")";
+	}
+	else if (event == EVENT_RBUTTONDOWN)
+	{
+		cout << "RB at (" << x << "," << y << ")";
+	}
+	else if (event == EVENT_MBUTTONDOWN)
+	{
+		cout << "MB at (" << x << "," << y << ")";
+	}
+}
+int main()
+{
+	Mat img;
+	img = imread("C:\\Users\\ARANYA\\Desktop\\stuff\\IP\\proj\\pics\\butterfly.jpg", CV_LOAD_IMAGE_COLOR);
+	namedWindow("my window", CV_WINDOW_NORMAL);
+	setMouseCallback("my window", CallBackFunc, NULL);
+	imshow("my window", img);
+	waitKey(0);
+	return 0;
+}
+
+

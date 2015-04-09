@@ -1,0 +1,16 @@
+Mat grey(Mat img)
+{
+
+	int m, n;
+
+	Mat img2(img.rows, img.cols, CV_8UC1);
+	for (m = 0; m < img.rows; m++)
+	{
+		for (n = 0; n < img.cols; n++)
+		{
+			img2.at<uchar>(m, n) = (56 * img.at<Vec3b>(m, n)[0] + 33 * img.at<Vec3b>(m, n)[1] + 11 * img.at<Vec3b>(m, n)[2]) / 100;
+
+		}
+	}
+	return img2;
+}

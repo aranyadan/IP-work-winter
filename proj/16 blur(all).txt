@@ -1,0 +1,137 @@
+// ComputerVision.cpp : Defines the entry point for the console application.
+//
+#include "stdafx.h"
+#include <iostream>
+#include <opencv2\core\core.hpp>
+#include <opencv2\highgui\highgui.hpp>
+#include <vector>
+#include <math.h>
+using namespace std;
+using namespace cv;
+
+Mat blurmean(Mat img)
+{
+	Mat img2(img.rows, img.cols, CV_8UC1, Scalar(0));
+	int val = 0;
+	for (int r = 0; r < img.rows; r++)
+	{
+		for (int c = 0; c < img.cols; c++)
+		{
+			if (r == 0 || c == 0 || r == img.rows - 1 || c == img.cols - 1)
+			{
+
+				continue;
+			}
+			val = 0;
+
+			for (int k = r - 1; k <= r + 1; k++)
+			{
+				for (int l = c - 1; l <= c + 1; l++)
+				{
+					val += img.at<uchar>(k, l);
+				}
+			}
+			img2.at<uchar>(r, c) = val / 9;
+		}
+	}
+	return img2;
+}
+Mat blurgauss(Mat img)
+{
+	Mat img2(img.rows, img.cols, CV_8UC1, Scalar(0));
+	float val = 0;
+	for (int r = 0; r < img.rows; r++)
+	{
+		for (int c = 0; c < img.cols; c++)
+		{
+			if (r == 0 || c == 0 || r == img.rows - 1 || c == img.cols - 1)
+			{
+
+				continue;
+			}
+			val = 0;
+
+			for (int k = r - 1; k <= r + 1; k++)
+			{
+				for (int l = c - 1; l <= c + 1; l++)
+				{
+					if ((k - r == -1 || k - r == 1) && (l - c == -1 || l - c == 1))
+						val += 0.06*img.at<uchar>(k, l);
+
+					else if (((k - r == -1 || k - r == 1) && (l - c == 0)) || ((k - r == 0) && (l - c == -1 || l - c == 1)))
+						val += 0.098*img.at<uchar>(k, l);
+
+					else if ((k - r ==0) && (l - c == 0))
+						val += 0.162*img.at<uchar>(k, l);
+				}
+			}
+			img2.at<uchar>(r, c) = (int)(val/.794);
+		}
+	}
+	return img2;
+}
+Mat blurmed(Mat img)
+{
+	Mat img2(img.rows, img.cols, CV_8UC1, Scalar(0));
+	int val[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	int y = 0;
+	for (int r = 0; r < img.rows; r++)
+	{
+		for (int c = 0; c < img.cols; c++)
+		{
+			if (r == 0 || c == 0 || r == img.rows - 1 || c == img.cols - 1)
+			{
+
+				continue;
+			}
+			for (int x = 0; x < 9; x++)
+				val[x] = 0;
+			y = 0;
+
+			for (int k = r - 1; k <= r + 1; k++)
+			{
+				for (int l = c - 1; l <= c + 1; l++)
+				{
+					val[y++] = (int)img.at<uchar>(k, l);
+				}
+			}
+			int temp = 0;
+			for (int k = 0; k < 9; k++)
+			{
+				for (int l = 0; l < 9 - k - 1; l++)
+				{
+					if (val[l]>val[l + 1])
+					{
+						temp = val[l];
+						val[l] = val[l + 1];
+						val[l + 1] = temp;
+					}
+				}
+			}
+			img2.at<uchar>(r, c) = val[4];
+		}
+	}
+	return img2;
+}
+int main()
+{
+	Mat img;
+	int thresh = 128;
+
+	namedWindow("original", CV_WINDOW_FULLSCREEN);
+	namedWindow("mean", CV_WINDOW_FULLSCREEN);
+	namedWindow("median", CV_WINDOW_FULLSCREEN);
+	namedWindow("gaussian", CV_WINDOW_FULLSCREEN);
+	img = imread("C:\\Users\\ARANYA\\Desktop\\stuff\\IP\\proj\\pics\\butterfly.jpg", CV_LOAD_IMAGE_GRAYSCALE);
+
+	imshow("original", img);
+	Mat img2 = blurgauss(img);
+	imshow("gaussian", img2);
+	Mat img3 = blurmean(img);        
+	imshow("mean", img3);
+	Mat img4 = blurmed(img);
+	imshow("median", img4);
+	waitKey(0);
+	return 0;
+}
+

@@ -1,0 +1,29 @@
+// ComputerVision.cpp : Defines the entry point for the console application.
+//
+#include "stdafx.h"
+#include <iostream>
+#include <opencv2\core\core.hpp>
+#include <opencv2\highgui\highgui.hpp>
+
+using namespace std;
+using namespace cv;
+
+
+int main()
+{
+	Mat frame;
+	VideoCapture v(0);
+	
+	namedWindow("my window", CV_WINDOW_NORMAL);
+	while (1)
+	{
+		v >> frame;
+		imshow("my window", frame);
+		char a=waitKey(33);
+		if (a == 27)
+			break;
+	}
+	return 0;
+}
+
+
